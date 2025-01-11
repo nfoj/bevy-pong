@@ -2,6 +2,11 @@ use bevy::prelude::*;
 use bevy::sprite::MeshMaterial2d;
 
 const BALL_SPEED: f32 = 5.;
+const PADDLE_WIDTH: f32 = 10.;
+const PADDLE_HEIGHT: f32 = 60.;
+
+#[derive(Compoment)]
+struct Paddle;
 
 #[derive(Component)]
 struct Position(Vec2);
@@ -26,9 +31,11 @@ impl BallBundle {
             ball: Ball,
             velocity: Velocity(Vec2::new(x, y)),
             position: Position(Vec2::new(0., 0.)),
+            paddle: Paddle,
         }
     }
 }
+
 //
 fn spawn_ball(
     //
