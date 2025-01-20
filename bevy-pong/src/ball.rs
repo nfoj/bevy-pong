@@ -9,8 +9,6 @@ impl Plugin for PongBallPlugin {
     }
 }
 
-
-
 const BALL_COLLISION_GROUP: Group = Group::GROUP_1;
 const REFLECT_COLLISION_GROUP: Group = Group::GROUP_2;
 
