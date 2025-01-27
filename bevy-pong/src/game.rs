@@ -146,3 +146,70 @@ impl PaddleBundle {
         }
     }
 }
+
+fn spawn_paddles (mut commands: Commands, mut meshes: ResMut<Assets<Mesh>>, mut materials: ResMut<Assets<ColorMaterial>>, window: Query<&Window>,) {
+    let window = match window.get_single() {
+        Ok(window) => window,
+        Err(_) => return,
+    };
+
+    let window_width = window.resolution.width();
+    let padding = 50.;
+    let right_paddle_x = window_width / 2. - padding;
+    let left_paddle_x = -window_width / 2. + padding;
+
+    let meshe = meshes.add(Rectangle::new(PADDLE_WIDTH, PADDLE_HEIGHT));
+    let player_color = materials.add(ColorMaterial::from_color(Color::srgb(1., 1., 0.)));
+    let ai_color = Handle<ColorMaterial> = materials.add(ColorMaterial::from_color(Color::srgb(1., 1., 0.)));
+    comands.spawn((
+        Player,
+        PaddleBundle::new(right_paddle_x, -0.),
+        Mesh2d(meshe.clone()),
+        MeshMaterial2d(player_color),
+    ));
+
+    commands.spawn((
+        Ai,
+        PaddleBundle::new(left_paddle_x, -0.),
+        Mesh2d(meshe),
+        MeshMaterial2d(ai_color),
+    ));
+}
+
+fn handle_ball_collisions(
+    mut collision_events: EventReader<CollisionEvent>,
+    mut ball: Query<(&mut Velocity, &Position), With<Ball>>,
+    paddle: Query<&Position, With<Paddle>>,
+    gutter: Query<&Position, With<Gutter>>,
+    mut commands: Commands,
+    pong_sounds: Res<PongSounds>,
+) {
+    for collision_event in collision_events.read() {
+        match collision_event {
+            CollisionEvent::Started(entity_a, entity_b, _flags) => {
+                if let Ok((mut ball_velocity, ball_position)) = ball.get_mut(*entity_b) {
+                    commands.spawn((
+                        AudioPlayer::new(pong_sounds.on_hit.clone_weak()),
+                        PlaybackSettings::ONCE.with_volume(Volume::new(0.5)),
+                    ));
+                    if let Ok(paddle) = paddle.get(*entity_a) {
+                        ball_velocity.0.x = (ball_position.0 - paddle.0).x.signum();
+                    } else if let Ok(gutter) = gutter.get(*entity_a) {
+                        ball_velocity.0.y = (ball_position.0 - gutter.0).y.signum();
+                    }
+                } else if let Ok((mut ball_velocity, ball_position)) = ball.get_mut(*entity_a) {
+                    commands.spawn((
+                        AudioPlayer::new(pong_sounds.on_hit.clone_weak()),
+                        PlaybackSettings::ONCE.with_volume(Volume::new(0.5)),
+                    ));
+                    if let Ok(paddle) = paddle.get(*entity_b) {
+                        ball_velocity.0.x = (ball_position.0 - paddle.0).x.signum();
+                    } else if let Ok(gutter) = gutter.get(*entity_b) {
+                        ball_velocity.0.y = (ball_position.0 - gutter.0).y.signum();
+                    }
+                }
+            }
+            _ => return,
+        }
+    }
+}
