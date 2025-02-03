@@ -7,3 +7,4 @@ authors = ["Name <link//email>"]
 
 [dependencies]
 bevy = "0.15.0"
+bevy_rapier2d = "0.28.0"
