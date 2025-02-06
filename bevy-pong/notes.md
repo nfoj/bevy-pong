@@ -1,24 +1,18 @@
 # Notes
 
-- Three
-
-src/
-├── main.rs        
-├── camera.rs      
-├── player.rs      
-├── world.rs       
-├── ui.rs          
-├── systems/      
-│   ├── movement.rs
-│   ├── collision.rs
-│   └── ...
-├── components/   
-│   ├── velocity.rs
-│   ├── health.rs
-│   └── ...
-├── resources.rs    
-└── plugins/        
-    ├── debug.rs
-    └── ...
+```
+[package]
+name = "bevy_pong"
+version = "0.1.0"
+edition = "2021"
+authors = ["nfoj <nfoj_@hotmail.com>"]
 
 
+[dependencies]
+bevy = "0.15.0"
+bevy_rapier2d = "0.28.0"
+  
+```
+
+bevy = game dev
+rapier = 2d and 3d
