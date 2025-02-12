@@ -1,8 +1,8 @@
 use bevy::prelude::*;
 
-pub struct PongCameraPlugin;
+pub struct GameCameraPlugin;
 
-impl Plugin for PongCameraPlugin {
+impl Plugin for GameCameraPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, spawn_camera);
     }

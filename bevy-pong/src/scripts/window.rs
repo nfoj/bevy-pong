@@ -1,8 +1,8 @@
 use bevy::prelude::*;
 
-pub struct PongWindowPlugin;
+pub struct GameWindowPlugin;
 
-impl Plugin for PongWindowPlugin {
+impl Plugin for GameWindowPlugin {
     fn build(&self, app: &mut App) {
         app.insert_resource(ClearColor(Color::srgb(0.1, 0.1, 0.1)))
             .add_plugins(DefaultPlugins.set(WindowPlugin {
