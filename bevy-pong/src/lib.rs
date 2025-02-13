@@ -3,6 +3,7 @@ use bevy::prelude::*;
 
 use scripts::camera::GameCameraPlugin;
 use scripts::controls::GameControlsPlugin;
+use scripts::settings::GameSettings;
 use scripts::states::GameStatesPlugin;
 use scripts::window::GameWindowPlugin;
 
@@ -11,6 +12,7 @@ mod scripts {
     pub mod camera;
     pub mod commands;
     pub mod controls;
+    pub mod settings;
     pub mod states;
     pub mod window;
 }

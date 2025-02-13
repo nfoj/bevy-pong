@@ -8,3 +8,4 @@ authors = ["nfoj <nfoj_@hotmail.com>"]
 [dependencies]
 bevy = "0.15.0"
 bevy_rapier2d = "0.28.0"
+leafwing-input-manager = "0.16"
