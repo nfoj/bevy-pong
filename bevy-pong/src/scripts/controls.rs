@@ -18,6 +18,7 @@ impl GameAction {
         input_map.insert(Self::Player2Up, KeyCode::KeyW);
         input_map.insert(Self::Player2Down, KeyCode::KeyS);
         input_map.insert(Self::Menu, KeyCode::Escape);
+        input_map
     }
 }
 

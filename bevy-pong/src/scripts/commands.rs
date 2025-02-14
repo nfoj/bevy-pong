@@ -1,5 +1,5 @@
+use super::settings::{GameSettings, PlayerType};
 use bevy::prelude::*;
-use settings::{GameSettings, PlayerType};
 
 #[derive(Clone)]
 pub struct UpdatePlayerCommand {
@@ -18,7 +18,7 @@ impl UpdatePlayerCommand {
 
 impl Command for UpdatePlayerCommand {
     fn apply(self, world: &mut World) {
-        if let Some(mut settings) = world.get_resource_mut::<GemeSettings>() {
+        if let Some(mut settings) = world.get_resource_mut::<GameSettings>() {
             settings.update_players(self.player_num, self.player_type);
         }
     }
