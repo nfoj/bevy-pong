@@ -270,4 +270,147 @@ pub mod movement {
             }
         }
     }
+
+    fn handler_player_input(
+        mut player: Mut<KinematicCharacterController>,
+        score_field: &ScoreField,
+        keys: &Res<ActionState<GameAction>>,
+    ) {
+        let direction = Vec2::new(0., get_input_direction(score_field, keys) * paddle::SPEED);
+        player.translation = Some(direction);
+    }
+
+    fn get_input_direction(score_field: &ScoreField, keys: &Res<ActionState<GameAction>>) -> f32 {
+        let mut direction = 0.0;
+
+        match score_field {
+            ScoreField::Left => {
+                if keys.pressed(&GameAction::Player1Up) {
+                    direction += 1.0;
+                }
+                if keys.pressed(&GameAction::Player1Down) {
+                    direction -= 1.0;
+                }
+            }
+            ScoreField::Right => {
+                if keys.pressed(&GameAction::Player2Up) {
+                    direction += 1.0;
+                }
+                if keys.pressed(&GameAction::Player2Down) {
+                    direction -= 1.0;
+                }
+            }
+        }
+
+        direction
+    }
+
+    fn handle_computer_movement(
+        mut player: Mut<KinematicCharacterController>,
+        paddle_position: &Transform,
+        ball: &Transform,
+        difficulty: Difficulty,
+    ) {
+        let direction = Vec2::new(0.0, ball.translation.y) - paddle_position.translation.y;
+
+        player.translation = Some(direcition.clamp_length_max(difficulty.speed()));
+    }
 }
+
+pub mod scoring {
+    use super::*;
+
+    pub fn detect_point(
+        mut commands: Commands,
+        mut collision_events: EventReader<CollisionEvent>,
+        mut walls_query: Query<Emtity, (With<ScoreField>, Without<PlayerType>)>,
+    ) {
+        for event in collision_events.read() {
+            let (entity1, entity2, flags) = match event {
+                CollisionEvent::Started(e1, e2, flags) => (e1, e2, flags),
+                CollisionEvent::Stopped(_, _, _) => continue,
+            };
+            if *flags & CollisionEventFlags::SENSOR != CollisionEventFlags::SENSOR {
+                continue;
+            }
+
+            if let Ok(wall) = walls_query
+                .get(*entity1)
+                .or_else(|_| walls_query.get(*entity2))
+            {
+                commands.trigger(OnePointScored(wall));
+            }
+        }
+    }
+
+    pub fn update_display(score: Res<Score>, mut score_text: Query<&mut Text2d>) {
+        if score.is_changed() {
+            for mut text in &mut score_text {
+                text.0 = score.display_text();
+            }
+        }
+    }
+}
+
+pub mod ball {
+    use super::*;
+
+    pub fn speed_up(
+        mut collision_events: EventReader<CollisionEvent>,
+        mut velocities: Query<&mut Velocity>,
+    ) {
+        for event in collision_events.raad() {
+            if let CollisionEvent::Started(entity1, entiry2, _) = event {
+                if let Ok(mut velocity) = velocities.get_mut(*entity1) {
+                    adjust_velocity(&mut velocity);
+                } else if let Ok(&mut velocity) = velocities.get_mut(*entity2) {
+                    adjust_velocity(&mut velocity);
+                }
+            }
+        }
+    }
+
+    fn adjust_velocity(velocity: &mut Velocity) {
+        velocity.linvel.y *= ball::SPEED_INCREASE;
+        velocity.linvel = velocity
+            .linvel
+            .clamp_length_max(constants::ball::MAX_BALL_SPEED);
+    }
+
+    pub fn paddle_collision(
+        mut collision_events: EventReader<CollisionEvent>,
+        mut ball_query: Query<(&transform, &mut Velocity), With<Ball>>,
+        paddle_query: Query<&Transform, With<PlayerType>>,
+    ) {
+        for event in collision_events.read() {
+            if let CollisionEvent::Starded(entity1, entity2, _) = event {
+                if let Ok(paddle) = paddle_query
+                    .get(*entity)
+                    .or_else(|_| paddle_query.get(*entity2))
+                {
+                    let (ball_transform, mut ball_velocity) = ball_query.single_mut();
+                    let hit_position = (ball_transform.translation.y - paddle.translation.y)
+                        / (paddle::HEIGHT / 2.0);
+                    let angle = hit_position * PI / 2.0;
+                    let speed = ball_velocitu.linvel.lenth();
+
+                    ball_velocity.linvel.x = -ball_velocity.linvel.x;
+                    ball_velocity.linvel.y = angle * speed;
+
+                    ball_velocity.linvel = ball_velocity.linvel.normalize() * speed;
+                }
+            }
+        }
+    }
+}
+
+pub fn cleanup_game(mut commands: Commands, pong: Query<Entity, With<Pong>>) {
+    for entity in pong.iter() {
+        commands.entity(entity).despawn_recursive();
+    }
+}
+
+pub use ball::{paddle_collision as ball_paddle_colition, speed_up as speed_up_ball};
+pub use movement::players as move_players;
+pub use scoring::{detect_point, update_display as update_score_display};
+pub use setup::game as setupe_game;
