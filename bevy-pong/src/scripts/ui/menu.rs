@@ -3,7 +3,8 @@ pub mod builder;
 pub mod components;
 
 pub mod style {
-    use bevy_equi::equi::Color32;
+    use bevy_egui::egui::Color32;
+
     pub const BUTTON_WIDTH: f32 = 200.0;
     pub const BUTTON_HEIGHT: f32 = 50.0;
     pub const SPACING: f32 = 10.0;

@@ -2,18 +2,17 @@ use bevy::app::App;
 use bevy::prelude::*;
 
 use scripts::camera::GameCameraPlugin;
-use scripts::controls::GameControlsPlugin;
-use scripts::settings::GameSettings;
-use scripts::states::GameStatesPlugin;
+use scripts::game::GamePlugin;
+use scripts::pong::PongPlugin;
+use scripts::ui::MenuSystemsPlugin;
 use scripts::window::GameWindowPlugin;
 
-// The 'game' module declaration is crucial
+// The 'game' module declaration is cruciaz
 mod scripts {
     pub mod camera;
-    pub mod commands;
-    pub mod controls;
-    pub mod settings;
-    pub mod states;
+    pub mod game;
+    pub mod pong;
+    pub mod ui;
     pub mod window;
 }
 
@@ -24,8 +23,9 @@ impl Plugin for AppPlugin {
         app.add_plugins((
             GameCameraPlugin,
             GameWindowPlugin,
-            GameStatesPlugin,
-            GameControlsPlugin,
+            GamePlugin,
+            PongPlugin,
+            MenuSystemsPlugin,
         ));
     }
 }
