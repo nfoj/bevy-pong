@@ -1,7 +1,10 @@
-use crate::scripts::ui::menu::components::MenuComponent;
-use crate::scripts::ui::menu::style;
+use crate::ui::menu::components::MenuComponent;
+use crate::ui::menu::style;
 use bevy::prelude::*;
-use bevy_egui::{egui, EguiContexts};
+use bevy_egui::{
+    egui::{self, Color32},
+    EguiContexts,
+};
 
 pub struct MenuBuilder {
     heading: String,
@@ -67,11 +70,11 @@ impl MenuBuilder {
     fn create_widget_style(&self, color: egui::Color32) -> egui::style::WidgetVisuals {
         egui::style::WidgetVisuals {
             bg_fill: color.clone(),
-            weak_bg_fill: color.clone(),
             fg_stroke: egui::Stroke::NONE,
             bg_stroke: egui::Stroke::NONE,
             rounding: egui::Rounding::default(),
             expansion: 0.,
+            weak_bg_fill: color.clone(),
         }
     }
 }

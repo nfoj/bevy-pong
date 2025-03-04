@@ -1,28 +1,30 @@
 use bevy::prelude::*;
-use pong::AppPlugin;
 
-mod scripts {
+use core::GamePlugin;
+use pong::PongPlugin;
+use ui::MenuSystemsPlugin;
+
+//
+use windows::camera::GameCameraPlugin;
+use windows::window::GameWindowPlugin;
+
+mod windows {
     pub mod camera;
-    pub mod game;
-    pub mod pong;
-    pub mod ui;
     pub mod window;
 }
 
-use scripts::camera::GameCameraPlugin;
-use scripts::game::GamePlugin;
-use scripts::pong::PongPlugin;
-use scripts::ui::MenuSystemsPlugin;
-use scripts::window::GameWindowPlugin;
-
-pub struct AppPlugin;
-
-impl Plugin for AppPlugin {
-    fn build(&self, app: &mut App) {
-        app.add_plugins((GameWindowPlugin, GamePlugin, PongPlugin, MenuSystemsPlugin));
-    }
-}
+mod core;
+mod pong;
+mod ui;
 
 fn main() {
-    App::new().add_plugins((DefaultPlugins, AppPlugin)).run();
+    App::new()
+        .add_plugins((
+            GameWindowPlugin,
+            GameCameraPlugin,
+            GamePlugin,
+            MenuSystemsPlugin,
+            PongPlugin,
+        ))
+        .run();
 }

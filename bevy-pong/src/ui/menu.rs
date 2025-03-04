@@ -12,7 +12,7 @@ pub mod style {
     pub const TEXT_SIZE: f32 = 24.0;
 
     pub const PRIMARY_COLOR: Color32 = Color32::WHITE;
-    pub const BACKGROUND_COLOR: Color32 = Color32::from_rgb(70, 70, 70);
-    pub const HOVER_COLOR: Color32 = Color32::from_rgb(120, 120, 120);
-    pub const ACTIVE_COLOR: Color32 = Color32::from_rgb(50, 50, 50);
+    pub const BACKGROUND_COLOR: Color32 = Color32::from_rgb(0, 0, 0);
+    pub const HOVER_COLOR: Color32 = Color32::from_rgb(102, 178, 255);
+    pub const ACTIVE_COLOR: Color32 = Color32::from_rgb(128, 128, 128);
 }

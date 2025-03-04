@@ -1,8 +1,7 @@
+use crate::ui::menu::actions::MenuAction;
+use crate::ui::menu::style;
 use bevy::prelude::*;
 use bevy_egui::egui;
-
-use crate::scripts::ui::menu::actions::MenuAction;
-use crate::scripts::ui::menu::style;
 
 pub trait MenuComponent {
     fn build(&mut self, ui: &mut egui::Ui, commands: &mut Commands);
@@ -21,7 +20,7 @@ impl MenuLabel {
 }
 
 impl MenuComponent for MenuLabel {
-    fn build(&mut self, ui: &mut egui::Ui, _comands: &mut Commands) {
+    fn build(&mut self, ui: &mut egui::Ui, _commands: &mut Commands) {
         ui.add_sized(
             egui::Vec2::new(style::BUTTON_WIDTH, style::BUTTON_HEIGHT),
             egui::Label::new(

@@ -52,14 +52,11 @@ where
     closure: F,
 }
 
-impl<F> ClosureMenuAction<F>
-where
-    F: Fn(&mut Commands),
-{
-    pub fn new(closure: F) -> Self {
-        Self { closure }
-    }
-}
+//impl<F> ClosureMenuAction<F> where F: Fn(&mut Commands) {
+//    pub fn new(closure: F) -> Self {
+//        Self { closure }
+//    }
+//}
 
 impl<F> MenuAction for ClosureMenuAction<F>
 where

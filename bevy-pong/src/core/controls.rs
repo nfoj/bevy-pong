@@ -18,6 +18,7 @@ impl GameAction {
         input_map.insert(Self::Player2Up, KeyCode::KeyW);
         input_map.insert(Self::Player2Down, KeyCode::KeyS);
         input_map.insert(Self::Menu, KeyCode::Escape);
+
         input_map
     }
 }
@@ -52,6 +53,7 @@ pub fn listen_for_keys(
             for key in keys.get_pressed() {
                 key_map.clear_action(&control);
                 key_map.insert(control, *key);
+
                 mapping.stop_remapping();
             }
         }

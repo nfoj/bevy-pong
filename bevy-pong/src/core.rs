@@ -1,11 +1,11 @@
-use bevy::prelude::*;
-use controls::GameControlsPlugin;
-use states::GameStatesPlugin;
-
 pub mod commands;
 pub mod controls;
 pub mod settings;
 pub mod states;
+
+use bevy::prelude::*;
+use controls::GameControlsPlugin;
+use states::GameStatesPlugin;
 
 pub struct GamePlugin;
 

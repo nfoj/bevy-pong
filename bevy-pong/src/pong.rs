@@ -1,13 +1,15 @@
-use bevy::prelude::*;
-use bevy_rapier2d::prelude::*;
-
-use crate::scripts::game::states::{GameState, PausedState, PlayingSet};
-use observers::*;
-use systems::*;
-
+mod components;
+mod constants;
 mod observers;
 mod resources;
 mod systems;
+
+use bevy::prelude::*;
+use bevy_rapier2d::prelude::*;
+
+use crate::core::states::{GameState, PausedState, PlayingSet};
+use observers::*;
+use systems::*;
 
 pub struct PongPlugin;
 

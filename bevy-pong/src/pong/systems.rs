@@ -1,52 +1,18 @@
 use bevy::prelude::*;
-use bevy_rapier2d::prelude::CollisionEvent;
 use bevy_rapier2d::prelude::*;
 use bevy_rapier2d::rapier::prelude::CollisionEventFlags;
 use leafwing_input_manager::prelude::*;
 
 use std::f32::consts::PI;
 
-use crate::scripts::game::controls::GameAction;
-use crate::scripts::game::settings::{Difficulty, GameSettings, PlayerType};
-use crate::scripts::game::states::PausedState;
+use crate::core::controls::GameAction;
+use crate::core::settings::{Difficulty, GameSettings, PlayerType};
+use crate::core::states::PausedState;
 
+use super::components::*;
+use super::constants;
 use super::observers::OnPointScored;
 use super::Score;
-
-#[derive(Component)]
-pub struct Pong;
-
-#[derive(Component)]
-pub struct Ball;
-
-#[derive(Component)]
-pub enum ScoreField {
-    Left,
-    Right,
-}
-
-pub mod config {
-    pub const WALL_THICKNESS: f32 = 10.0;
-    pub const TOP_BUFFER: f32 = 100.0;
-}
-
-pub mod game {
-    pub const MAX_SCORE: u32 = 5;
-}
-
-pub mod paddle {
-    pub const WIDTH: f32 = 10.0;
-    pub const HEIGHT: f32 = 100.0;
-    pub const BUFFER: f32 = 40.0;
-    pub const SPEED: f32 = 6.;
-}
-
-pub mod ball {
-    pub const RADIUS: f32 = 10.0;
-    pub const INITIAL_VELOCITY: (f32, f32) = (200.0, 100.0);
-    pub const SPEED_INCREASE: f32 = 2.;
-    pub const MAX_BALL_SPEED: f32 = 1000.;
-}
 
 pub mod setup {
     use super::*;
@@ -118,36 +84,36 @@ pub mod setup {
         meshes: &mut ResMut<Assets<Mesh>>,
         materials: &mut ResMut<Assets<ColorMaterial>>,
     ) {
-        // horizontal walls
+        // Create horizontal walls
         for y_pos in [
-            screen_height / 2.0 - config::WALL_THICKNESS - config::TOP_BUFFER,
-            screen_height / -2.0 + config::WALL_THICKNESS,
+            screen_height / 2.0 - constants::WALL_THICKNESS - constants::TOP_BUFFER,
+            screen_height / -2.0 + constants::WALL_THICKNESS,
         ] {
             create_wall(
                 builder,
                 meshes,
                 materials,
                 screen_width,
-                config::WALL_THICKNESS,
+                constants::WALL_THICKNESS,
                 Transform::from_xyz(0.0, y_pos, 0.0),
             );
         }
 
-        // scoring
-        let sensor_height = screen_height - config::TOP_BUFFER - config::WALL_THICKNESS;
+        // Create scoring sensors
+        let sensor_height = screen_height - constants::TOP_BUFFER - constants::WALL_THICKNESS;
         for (x_pos, score_field) in [
             (
-                screen_width / -2.0 + config::WALL_THICKNESS,
+                screen_width / -2.0 + constants::WALL_THICKNESS,
                 ScoreField::Left,
             ),
             (
-                screen_height / 2.0 - config::WALL_THICKNESS,
+                screen_width / 2.0 - constants::WALL_THICKNESS,
                 ScoreField::Right,
             ),
         ] {
             builder.spawn((
-                Transform::from_xyz(x_pos, config::TOP_BUFFER / -2.0, 0.0),
-                Collider::cuboid(config::WALL_THICKNESS, sensor_height / 2.0),
+                Transform::from_xyz(x_pos, constants::TOP_BUFFER / -2.0, 0.0),
+                Collider::cuboid(constants::WALL_THICKNESS, sensor_height / 2.0),
                 Sensor,
                 score_field,
             ));
@@ -163,10 +129,16 @@ pub mod setup {
         score_field: ScoreField,
     ) {
         builder.spawn((
-            Mesh2d(meshes.add(Rectangle::new(paddle::WIDTH, paddle::HEIGHT))),
+            Mesh2d(meshes.add(Rectangle::new(
+                constants::paddle::WIDTH,
+                constants::paddle::HEIGHT,
+            ))),
             MeshMaterial2d(materials.add(Color::WHITE)),
             transform,
-            Collider::cuboid(paddle::WIDTH / 2.0, paddle::HEIGHT / 2.0),
+            Collider::cuboid(
+                constants::paddle::WIDTH / 2.0,
+                constants::paddle::HEIGHT / 2.0,
+            ),
             RigidBody::KinematicPositionBased,
             KinematicCharacterController::default(),
             player_type,
@@ -183,12 +155,12 @@ pub mod setup {
     ) {
         for (x_offset, player_type, score_field) in [
             (
-                screen_width / -2.0 + paddle::BUFFER,
+                screen_width / -2.0 + constants::paddle::BUFFER,
                 settings.get_player1(),
                 ScoreField::Left,
             ),
             (
-                screen_width / 2.0 - paddle::BUFFER,
+                screen_width / 2.0 - constants::paddle::BUFFER,
                 settings.get_player2(),
                 ScoreField::Right,
             ),
@@ -197,14 +169,14 @@ pub mod setup {
                 builder,
                 meshes,
                 materials,
-                Transform::from_xyz(x_offset, config::TOP_BUFFER / -2.0, 0.0),
+                Transform::from_xyz(x_offset, constants::TOP_BUFFER / -2.0, 0.0),
                 player_type.clone(),
                 score_field,
             );
         }
     }
 
-    fn create_score(builder: &mut ChildBuilder, _window_height: f32) {
+    fn create_score(builder: &mut ChildBuilder, window_height: f32) {
         builder.spawn((
             Text2d::new("0 - 0"),
             TextColor(Color::WHITE),
@@ -212,6 +184,7 @@ pub mod setup {
                 font_size: 100.,
                 ..default()
             },
+            Transform::from_translation((window_height / 2.0 - 50.) * Vec3::Y),
         ));
     }
 
@@ -221,24 +194,27 @@ pub mod setup {
         materials: &mut ResMut<Assets<ColorMaterial>>,
     ) {
         builder.spawn((
-            Mesh2d(meshes.add(Circle::new(ball::RADIUS))),
+            Mesh2d(meshes.add(Circle::new(constants::ball::RADIUS))),
             MeshMaterial2d(materials.add(Color::WHITE)),
             Ball,
             RigidBody::Dynamic,
             Ccd::enabled(),
             Velocity {
-                linvel: Vec2::new(ball::INITIAL_VELOCITY.0, ball::INITIAL_VELOCITY.1),
+                linvel: Vec2::new(
+                    constants::ball::INITIAL_VELOCITY.0,
+                    constants::ball::INITIAL_VELOCITY.1,
+                ),
                 angvel: 0.,
             },
             GravityScale(0.),
             Sleeping::disabled(),
-            Collider::ball(ball::RADIUS),
+            Collider::ball(constants::ball::RADIUS),
             Restitution {
                 coefficient: 0.99,
                 combine_rule: CoefficientCombineRule::Max,
             },
             Friction {
-                coefficient: 0.99,
+                coefficient: 0.01,
                 combine_rule: CoefficientCombineRule::Min,
             },
             ActiveEvents::COLLISION_EVENTS,
@@ -263,20 +239,23 @@ pub mod movement {
 
         for (player, player_type, paddle_position, score_field) in players.iter_mut() {
             match player_type {
-                PlayerType::Human => handler_player_input(player, score_field, &keys),
+                PlayerType::Human => handle_player_input(player, score_field, &keys),
                 PlayerType::Computer(difficulty) => {
-                    handler_computer_movement(player, paddle_position, ball, *difficulty)
+                    handle_computer_movement(player, paddle_position, ball, *difficulty)
                 }
             }
         }
     }
 
-    fn handler_player_input(
+    fn handle_player_input(
         mut player: Mut<KinematicCharacterController>,
         score_field: &ScoreField,
         keys: &Res<ActionState<GameAction>>,
     ) {
-        let direction = Vec2::new(0., get_input_direction(score_field, keys) * paddle::SPEED);
+        let direction = Vec2::new(
+            0.,
+            get_input_direction(score_field, keys) * constants::paddle::SPEED,
+        );
         player.translation = Some(direction);
     }
 
@@ -305,13 +284,13 @@ pub mod movement {
         direction
     }
 
-    fn handler_computer_movement(
+    fn handle_computer_movement(
         mut player: Mut<KinematicCharacterController>,
         paddle_position: &Transform,
         ball: &Transform,
         difficulty: Difficulty,
     ) {
-        let direction = Vec2::new(0.0, ball.translation.y) - paddle_position.translation.y;
+        let direction = Vec2::new(0.0, ball.translation.y - paddle_position.translation.y);
 
         player.translation = Some(direction.clamp_length_max(difficulty.speed()));
     }
@@ -323,7 +302,7 @@ pub mod scoring {
     pub fn detect_point(
         mut commands: Commands,
         mut collision_events: EventReader<CollisionEvent>,
-        mut walls_query: Query<Entity, (With<ScoreField>, Without<PlayerType>)>,
+        walls_query: Query<Entity, (With<ScoreField>, Without<PlayerType>)>,
     ) {
         for event in collision_events.read() {
             let (entity1, entity2, flags) = match event {
@@ -332,8 +311,9 @@ pub mod scoring {
             };
 
             if *flags & CollisionEventFlags::SENSOR != CollisionEventFlags::SENSOR {
-                // ...
+                continue;
             }
+
             if let Ok(wall) = walls_query
                 .get(*entity1)
                 .or_else(|_| walls_query.get(*entity2))
@@ -352,9 +332,8 @@ pub mod scoring {
     }
 }
 
-pub mod speed_ball {
+pub mod ball {
     use super::*;
-
     pub fn speed_up(
         mut collision_events: EventReader<CollisionEvent>,
         mut velocities: Query<&mut Velocity>,
@@ -371,8 +350,10 @@ pub mod speed_ball {
     }
 
     fn adjust_velocity(velocity: &mut Velocity) {
-        velocity.linvel.y *= ball::SPEED_INCREASE;
-        velocity.linvel = velocity.linvel.clamp_length_max(ball::MAX_BALL_SPEED);
+        velocity.linvel.y *= constants::ball::SPEED_INCREASE;
+        velocity.linvel = velocity
+            .linvel
+            .clamp_length_max(constants::ball::MAX_BALL_SPEED);
     }
 
     pub fn paddle_collision(
@@ -387,8 +368,9 @@ pub mod speed_ball {
                     .or_else(|_| paddle_query.get(*entity2))
                 {
                     let (ball_transform, mut ball_velocity) = ball_query.single_mut();
+
                     let hit_position = (ball_transform.translation.y - paddle.translation.y)
-                        / (paddle::HEIGHT / 2.0);
+                        / (constants::paddle::HEIGHT / 2.0);
                     let angle = hit_position * PI / 2.0;
                     let speed = ball_velocity.linvel.length();
 
@@ -408,7 +390,7 @@ pub fn cleanup_game(mut commands: Commands, pong: Query<Entity, With<Pong>>) {
     }
 }
 
+pub use ball::{paddle_collision as ball_paddle_collision, speed_up as speed_up_ball};
 pub use movement::players as move_players;
 pub use scoring::{detect_point, update_display as update_score_display};
 pub use setup::game as setup_game;
-pub use speed_ball::{paddle_collision as ball_paddle_collision, speed_up as speed_up_ball};

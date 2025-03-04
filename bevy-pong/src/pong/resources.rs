@@ -1,5 +1,5 @@
-use crate::scripts::pong::systems::game::MAX_SCORE;
-use crate::scripts::pong::systems::ScoreField;
+use super::components::ScoreField;
+use crate::pong::constants::game::MAX_SCORE;
 use bevy::prelude::*;
 
 #[derive(Resource)]

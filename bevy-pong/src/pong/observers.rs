@@ -1,7 +1,7 @@
+use super::components::{Ball, Pong, ScoreField};
 use super::resources::Score;
-use super::systems::{Ball, Pong, ScoreField};
-use crate::scripts::game::settings::PlayerType; // GameSettings
-use crate::scripts::game::states::GameState;
+use crate::core::settings::PlayerType;
+use crate::core::states::GameState;
 use bevy::prelude::*;
 
 #[derive(Event, Debug)]
@@ -44,6 +44,6 @@ pub fn end_game(
     mut next_state: ResMut<NextState<GameState>>,
 ) {
     if score.is_game_end() {
-        next_state.set(GameState::EndGame);
+        next_state.set(GameState::Endgame);
     }
 }

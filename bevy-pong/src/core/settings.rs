@@ -50,9 +50,9 @@ pub enum Difficulty {
 impl Difficulty {
     pub fn speed(&self) -> f32 {
         match self {
-            Difficulty::Easy => 6.,
-            Difficulty::Difficult => 12.,
-            Difficulty::Impossible => 18.,
+            Difficulty::Easy => 8.,
+            Difficulty::Difficult => 10.,
+            Difficulty::Impossible => 12.,
         }
     }
 }
