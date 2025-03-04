@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 use bevy_rapier2d::prelude::*;
 
-use crate::game::states::{GameState, PausedState, PlayingSet};
+use crate::scripts::game::states::{GameState, PausedState, PlayingSet};
 use observers::*;
 use systems::*;
 

@@ -1,7 +1,7 @@
-use crate::ui::menu::components::MenuComponent;
-use crate::ui::menu::style;
+use crate::scripts::ui::menu::components::MenuComponent;
+use crate::scripts::ui::menu::style;
 use bevy::prelude::*;
-use bevy_egui::{egui, EguiContext};
+use bevy_egui::{egui, EguiContexts};
 
 pub struct MenuBuilder {
     heading: String,
@@ -25,6 +25,7 @@ impl MenuBuilder {
 
     pub fn add_component(mut self, component: impl MenuComponent + 'static) -> Self {
         self.components.push(Box::new(component));
+        self
     }
 
     pub fn build(mut self, mut contexts: EguiContexts, commands: &mut Commands) {
@@ -70,7 +71,7 @@ impl MenuBuilder {
             fg_stroke: egui::Stroke::NONE,
             bg_stroke: egui::Stroke::NONE,
             rounding: egui::Rounding::default(),
-            expasion: 0.,
+            expansion: 0.,
         }
     }
 }

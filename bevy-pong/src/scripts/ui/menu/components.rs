@@ -1,8 +1,8 @@
 use bevy::prelude::*;
 use bevy_egui::egui;
 
-use crate::ui::menu::actions::MenuAction;
-use crate::ui::menu::style;
+use crate::scripts::ui::menu::actions::MenuAction;
+use crate::scripts::ui::menu::style;
 
 pub trait MenuComponent {
     fn build(&mut self, ui: &mut egui::Ui, commands: &mut Commands);
@@ -12,7 +12,7 @@ pub struct MenuLabel {
     label: String,
 }
 
-impl ManuLabel {
+impl MenuLabel {
     pub fn new(label: impl Into<String>) -> Self {
         Self {
             label: label.into(),
@@ -25,7 +25,7 @@ impl MenuComponent for MenuLabel {
         ui.add_sized(
             egui::Vec2::new(style::BUTTON_WIDTH, style::BUTTON_HEIGHT),
             egui::Label::new(
-                egui::RighText::new(&self.laberl)
+                egui::RichText::new(&self.label)
                     .color(style::PRIMARY_COLOR)
                     .size(style::TEXT_SIZE),
             ),
@@ -39,7 +39,7 @@ pub struct MenuSelectableLabel {
     action: Box<dyn MenuAction>,
 }
 
-impl MenuSelectablelabel {
+impl MenuSelectableLabel {
     pub fn new(
         label: impl Into<String>,
         selected: bool,
@@ -123,7 +123,7 @@ impl MenuLayoutHorizontal {
 
 impl MenuComponent for MenuLayoutHorizontal {
     fn build(&mut self, ui: &mut egui::Ui, commands: &mut Commands) {
-        let layout = egui::Layout::centered_adn_justified(egui::Direction::LeftToRight);
+        let layout = egui::Layout::centered_and_justified(egui::Direction::LeftToRight);
         ui.allocate_ui_with_layout(
             [
                 self.components.len() as f32 * (style::BUTTON_WIDTH + 5.),

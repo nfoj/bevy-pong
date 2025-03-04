@@ -1,8 +1,8 @@
+use super::resources::Score;
+use super::systems::{Ball, Pong, ScoreField};
+use crate::scripts::game::settings::PlayerType; // GameSettings
+use crate::scripts::game::states::GameState;
 use bevy::prelude::*;
-use resources::Score;
-use settings::PlayerType; // GameSettings
-use states::GameState;
-use systems::{Ball, Pong, ScoreField};
 
 #[derive(Event, Debug)]
 pub struct OnPointScored(pub Entity);

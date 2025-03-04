@@ -1,15 +1,15 @@
 use bevy::prelude::*;
-use bevy_rapier2d::prelude::CollisionEventFlags;
+use bevy_rapier2d::prelude::CollisionEvent;
 use bevy_rapier2d::prelude::*;
+use bevy_rapier2d::rapier::prelude::CollisionEventFlags;
 use leafwing_input_manager::prelude::*;
 
 use std::f32::consts::PI;
 
-use crate::controls::GameAction;
-use crate::settings::{Difficult, GameSettings, PlayerType};
-use crate::states::PausedState;
+use crate::scripts::game::controls::GameAction;
+use crate::scripts::game::settings::{Difficulty, GameSettings, PlayerType};
+use crate::scripts::game::states::PausedState;
 
-use super::components::*;
 use super::observers::OnPointScored;
 use super::Score;
 
@@ -25,23 +25,23 @@ pub enum ScoreField {
     Right,
 }
 
-mod config {
+pub mod config {
     pub const WALL_THICKNESS: f32 = 10.0;
     pub const TOP_BUFFER: f32 = 100.0;
 }
 
-mod game {
+pub mod game {
     pub const MAX_SCORE: u32 = 5;
 }
 
-mod paddle {
+pub mod paddle {
     pub const WIDTH: f32 = 10.0;
     pub const HEIGHT: f32 = 100.0;
     pub const BUFFER: f32 = 40.0;
-    pub const SPEED: F32 = 6.;
+    pub const SPEED: f32 = 6.;
 }
 
-mod ball {
+pub mod ball {
     pub const RADIUS: f32 = 10.0;
     pub const INITIAL_VELOCITY: (f32, f32) = (200.0, 100.0);
     pub const SPEED_INCREASE: f32 = 2.;
@@ -204,7 +204,7 @@ pub mod setup {
         }
     }
 
-    fn create_score(builder: &mut ChildBuilder, window_height: f32) {
+    fn create_score(builder: &mut ChildBuilder, _window_height: f32) {
         builder.spawn((
             Text2d::new("0 - 0"),
             TextColor(Color::WHITE),
@@ -225,9 +225,9 @@ pub mod setup {
             MeshMaterial2d(materials.add(Color::WHITE)),
             Ball,
             RigidBody::Dynamic,
-            Ccd::enable(),
+            Ccd::enabled(),
             Velocity {
-                livel: vec2::new(ball::INITIAL_VELOCITY.0, ball::INITIAL_VELOCITY.1),
+                linvel: Vec2::new(ball::INITIAL_VELOCITY.0, ball::INITIAL_VELOCITY.1),
                 angvel: 0.,
             },
             GravityScale(0.),
@@ -263,9 +263,9 @@ pub mod movement {
 
         for (player, player_type, paddle_position, score_field) in players.iter_mut() {
             match player_type {
-                PlayerType::Human => handle_player_input(player, score_field, &keys),
+                PlayerType::Human => handler_player_input(player, score_field, &keys),
                 PlayerType::Computer(difficulty) => {
-                    handle_computer_movement(player, paddle_position, ball, *difficulty)
+                    handler_computer_movement(player, paddle_position, ball, *difficulty)
                 }
             }
         }
@@ -305,7 +305,7 @@ pub mod movement {
         direction
     }
 
-    fn handle_computer_movement(
+    fn handler_computer_movement(
         mut player: Mut<KinematicCharacterController>,
         paddle_position: &Transform,
         ball: &Transform,
@@ -313,7 +313,7 @@ pub mod movement {
     ) {
         let direction = Vec2::new(0.0, ball.translation.y) - paddle_position.translation.y;
 
-        player.translation = Some(direcition.clamp_length_max(difficulty.speed()));
+        player.translation = Some(direction.clamp_length_max(difficulty.speed()));
     }
 }
 
@@ -323,22 +323,22 @@ pub mod scoring {
     pub fn detect_point(
         mut commands: Commands,
         mut collision_events: EventReader<CollisionEvent>,
-        mut walls_query: Query<Emtity, (With<ScoreField>, Without<PlayerType>)>,
+        mut walls_query: Query<Entity, (With<ScoreField>, Without<PlayerType>)>,
     ) {
         for event in collision_events.read() {
             let (entity1, entity2, flags) = match event {
                 CollisionEvent::Started(e1, e2, flags) => (e1, e2, flags),
                 CollisionEvent::Stopped(_, _, _) => continue,
             };
-            if *flags & CollisionEventFlags::SENSOR != CollisionEventFlags::SENSOR {
-                continue;
-            }
 
+            if *flags & CollisionEventFlags::SENSOR != CollisionEventFlags::SENSOR {
+                // ...
+            }
             if let Ok(wall) = walls_query
                 .get(*entity1)
                 .or_else(|_| walls_query.get(*entity2))
             {
-                commands.trigger(OnePointScored(wall));
+                commands.trigger(OnPointScored(wall));
             }
         }
     }
@@ -352,18 +352,18 @@ pub mod scoring {
     }
 }
 
-pub mod ball {
+pub mod speed_ball {
     use super::*;
 
     pub fn speed_up(
         mut collision_events: EventReader<CollisionEvent>,
         mut velocities: Query<&mut Velocity>,
     ) {
-        for event in collision_events.raad() {
-            if let CollisionEvent::Started(entity1, entiry2, _) = event {
+        for event in collision_events.read() {
+            if let CollisionEvent::Started(entity1, entity2, _) = event {
                 if let Ok(mut velocity) = velocities.get_mut(*entity1) {
                     adjust_velocity(&mut velocity);
-                } else if let Ok(&mut velocity) = velocities.get_mut(*entity2) {
+                } else if let Ok(mut velocity) = velocities.get_mut(*entity2) {
                     adjust_velocity(&mut velocity);
                 }
             }
@@ -372,27 +372,25 @@ pub mod ball {
 
     fn adjust_velocity(velocity: &mut Velocity) {
         velocity.linvel.y *= ball::SPEED_INCREASE;
-        velocity.linvel = velocity
-            .linvel
-            .clamp_length_max(constants::ball::MAX_BALL_SPEED);
+        velocity.linvel = velocity.linvel.clamp_length_max(ball::MAX_BALL_SPEED);
     }
 
     pub fn paddle_collision(
         mut collision_events: EventReader<CollisionEvent>,
-        mut ball_query: Query<(&transform, &mut Velocity), With<Ball>>,
+        mut ball_query: Query<(&Transform, &mut Velocity), With<Ball>>,
         paddle_query: Query<&Transform, With<PlayerType>>,
     ) {
         for event in collision_events.read() {
-            if let CollisionEvent::Starded(entity1, entity2, _) = event {
+            if let CollisionEvent::Started(entity1, entity2, _) = event {
                 if let Ok(paddle) = paddle_query
-                    .get(*entity)
+                    .get(*entity1)
                     .or_else(|_| paddle_query.get(*entity2))
                 {
                     let (ball_transform, mut ball_velocity) = ball_query.single_mut();
                     let hit_position = (ball_transform.translation.y - paddle.translation.y)
                         / (paddle::HEIGHT / 2.0);
                     let angle = hit_position * PI / 2.0;
-                    let speed = ball_velocitu.linvel.lenth();
+                    let speed = ball_velocity.linvel.length();
 
                     ball_velocity.linvel.x = -ball_velocity.linvel.x;
                     ball_velocity.linvel.y = angle * speed;
@@ -410,7 +408,7 @@ pub fn cleanup_game(mut commands: Commands, pong: Query<Entity, With<Pong>>) {
     }
 }
 
-pub use ball::{paddle_collision as ball_paddle_colition, speed_up as speed_up_ball};
 pub use movement::players as move_players;
 pub use scoring::{detect_point, update_display as update_score_display};
-pub use setup::game as setupe_game;
+pub use setup::game as setup_game;
+pub use speed_ball::{paddle_collision as ball_paddle_collision, speed_up as speed_up_ball};

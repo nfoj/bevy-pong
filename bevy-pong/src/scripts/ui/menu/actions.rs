@@ -5,7 +5,7 @@ pub trait MenuAction {
     fn execute(&self, commands: &mut Commands);
 }
 
-pub struct ChageStateMenuAction<State: FreelyMutableState> {
+pub struct ChangeStateMenuAction<State: FreelyMutableState> {
     next_state: State,
 }
 
@@ -15,7 +15,7 @@ impl<State: FreelyMutableState> ChangeStateMenuAction<State> {
     }
 }
 
-impl<State: FreelyMutableState> MenuAction for ChageStateMenuAction<State> {
+impl<State: FreelyMutableState> MenuAction for ChangeStateMenuAction<State> {
     fn execute(&self, commands: &mut Commands) {
         commands.set_state(self.next_state.clone());
     }
@@ -41,7 +41,7 @@ pub struct QuitMenuAction;
 
 impl MenuAction for QuitMenuAction {
     fn execute(&self, commands: &mut Commands) {
-        commands.send_event(AppExit::Sucess);
+        commands.send_event(AppExit::Success);
     }
 }
 
@@ -86,7 +86,7 @@ where
     }
 }
 
-impl<C> MenuAction for CommandmenuAction<C>
+impl<C> MenuAction for CommandMenuAction<C>
 where
     C: Command + Clone,
 {

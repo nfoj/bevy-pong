@@ -1,5 +1,6 @@
+use crate::scripts::pong::systems::game::MAX_SCORE;
+use crate::scripts::pong::systems::ScoreField;
 use bevy::prelude::*;
-use systems::{ScoreField, MAX_SCORE};
 
 #[derive(Resource)]
 pub struct Score {
